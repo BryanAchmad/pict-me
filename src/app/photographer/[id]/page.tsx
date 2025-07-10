@@ -4,16 +4,14 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getSupabaseImageUrl } from "@/lib/utils";
+import { cache } from "react";
 
-type Props = {
-	params: { id: string };
-};
-
-async function getPhotographer(id: string): Promise<IProfile | null> {
-	const { data, error } = await supabase
-		.from("profiles")
-		.select(
-			`
+const getPhotographer = cache(
+	async (id: string): Promise<IProfile | null> => {
+		const { data, error } = await supabase
+			.from("profiles")
+			.select(
+				`
       *,
       photographer_profiles (
         *,
@@ -27,22 +25,26 @@ async function getPhotographer(id: string): Promise<IProfile | null> {
         )
       )
     `
-		)
-		.eq("id", id)
-		.eq("is_photographer", true)
-		.single();
+			)
+			.eq("id", id)
+			.eq("is_photographer", true)
+			.single();
 
-	if (error || !data) {
-		console.error("Error fetching photographer:", error);
-		return null;
+		if (error || !data) {
+			console.error("Error fetching photographer:", error);
+			return null;
+		}
+
+		return data as IProfile;
 	}
+);
 
-	return data as IProfile;
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-	const { id } = params;
-	const photographer = await getPhotographer(id);
+export async function generateMetadata({
+	params,
+}: {
+	params: { id: string };
+}): Promise<Metadata> {
+	const photographer = await getPhotographer(params.id);
 
 	if (!photographer) {
 		return {
@@ -74,9 +76,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-export default async function PhotographerPage({ params }: Props) {
-	const { id } = params;
-	const photographer = await getPhotographer(id);
+export default async function PhotographerPage({
+	params,
+}: {
+	params: { id: string };
+}) {
+	const photographer = await getPhotographer(params.id);
 
 	if (!photographer) {
 		notFound();
