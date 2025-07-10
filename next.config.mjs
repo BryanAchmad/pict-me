@@ -1,8 +1,8 @@
 const nextConfig = {
 	env: {
 		NEXT_PUBLIC_BASE_URL:
-			process.env.NODE_ENV === "production"
-				? "https://your-production-domain.com"
+			process.env.VERCEL_URL
+				? `https://${process.env.VERCEL_URL}`
 				: "http://localhost:3000",
 	},
 	images: {
