@@ -7,11 +7,11 @@ import {
 } from "@/components/ui/PhotographerCard";
 import supabase from "@/lib/supabase/server";
 import { IProfile } from "@/types/photographer.type";
+import { getSupabaseImageUrl } from "@/lib/utils";
 import { ArrowRightIcon, StarIcon } from "lucide-react";
 import { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
-import { getSupabaseImageUrl } from "@/lib/utils";
+import Link from "next/link";
 
 export const metadata: Metadata = {
 	title: "Explore Fotografer Profesional",
@@ -50,11 +50,11 @@ async function getPhotographers(page: number, perPage: number) {
 
 	return { data: data as IProfile[], count: count || 0 };
 }
-
-export default async function Explore({
-	searchParams,
+export default async function ExplorePage({
+  	searchParams,
 }: {
-	searchParams?: { [key: string]: string | string[] | undefined };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  searchParams?: any
 }) {
 	const perPage = 8;
 	const page =
@@ -126,17 +126,6 @@ export default async function Explore({
 																	.location
 															}
 														</div>
-													</div>
-
-													<div className="[font-family:'Geist',Helvetica] font-normal text-[#bebebd] text-xl leading-6 whitespace-nowrap">
-														•
-													</div>
-
-													<div className="[font-family:'Geist',Helvetica] font-normal text-[#bebebd] text-sm leading-6 whitespace-nowrap">
-														{
-															photographer.photographer_profiles
-																.location
-														}
 													</div>
 												</div>
 											</div>

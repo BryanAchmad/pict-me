@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import supabase from "@/lib/supabase/server";
 import { IProfile } from "@/types/photographer.type";
 import { Metadata } from "next";
@@ -27,10 +28,9 @@ const getPhotographer = cache(
     `
 			)
 			.eq("id", id)
-			.eq("is_photographer", true)
 			.single();
 
-		if (error || !data) {
+		if (error) {
 			console.error("Error fetching photographer:", error);
 			return null;
 		}
@@ -39,11 +39,13 @@ const getPhotographer = cache(
 	}
 );
 
-export async function generateMetadata({
-	params,
-}: {
+type GenerateMetadataProps = {
 	params: { id: string };
-}): Promise<Metadata> {
+};
+
+export async function generateMetadata(
+	{ params }: GenerateMetadataProps
+): Promise<Metadata> {
 	const photographer = await getPhotographer(params.id);
 
 	if (!photographer) {
@@ -62,25 +64,18 @@ export async function generateMetadata({
 			description:
 				photographer.photographer_profiles.bio ||
 				`Portofolio dan layanan dari ${photographer.full_name}.`,
-			images: [
-				{
-					url:
-						getSupabaseImageUrl(photographer.avatar_url) ||
-						"/og-image.jpg",
-					width: 800,
-					height: 600,
-					alt: `Foto profil ${photographer.full_name}`,
-				},
-			],
 		},
 	};
 }
 
-export default async function PhotographerPage({
-	params,
-}: {
+type PageProps = {
 	params: { id: string };
-}) {
+	searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default async function PhotographerPage(
+	{ params }: PageProps
+) {
 	const photographer = await getPhotographer(params.id);
 
 	if (!photographer) {
@@ -104,44 +99,51 @@ export default async function PhotographerPage({
 					/>
 				</div>
 				<div className="md:w-2/3">
-					<h1 className="text-4xl font-bold mb-2">{photographer.full_name}</h1>
-					<p className="text-lg text-gray-600 mb-4">
-						{photographer.photographer_profiles.location}
+					<h1 className="text-3xl font-bold mb-4">{photographer.full_name}</h1>
+					<p className="text-gray-600 mb-6">
+						{photographer.photographer_profiles.bio}
 					</p>
-					<div className="flex flex-wrap gap-2 mb-4">
-						{photographer.photographer_profiles.photographer_categories.map(
-							(cat) => (
-								<span
-									key={cat.categories.id}
-									className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
-								>
-									{cat.categories.name}
-								</span>
-							)
-						)}
+					<div className="mb-6">
+						<h2 className="text-xl font-semibold mb-2">Lokasi</h2>
+						<p>{photographer.photographer_profiles.location}</p>
 					</div>
-					<div className="prose max-w-none">
-						<p>{photographer.photographer_profiles.bio}</p>
+					<div className="mb-6">
+						<h2 className="text-xl font-semibold mb-2">Tarif per Jam</h2>
+						<p>Rp {photographer.photographer_profiles.hourly_rate.toLocaleString()}</p>
 					</div>
-					<div className="mt-6">
-						<h3 className="text-2xl font-semibold mb-2">Layanan</h3>
+					<div className="mb-6">
+						<h2 className="text-xl font-semibold mb-2">Layanan</h2>
 						<p>{photographer.photographer_profiles.services_offered}</p>
 					</div>
-					<div className="mt-6">
-						<h3 className="text-2xl font-semibold mb-2">Hubungi</h3>
-						<p>Email: {photographer.email}</p>
-						<p>Telepon: {photographer.phone_number}</p>
+					<div className="mb-6">
+						<h2 className="text-xl font-semibold mb-2">Kategori</h2>
+						<div className="flex flex-wrap gap-2">
+							{photographer.photographer_profiles.photographer_categories.map(
+								(category) => (
+									<span
+										key={category.categories.id}
+										className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+									>
+										{category.categories.name}
+									</span>
+								)
+							)}
+						</div>
 					</div>
-					<div className="mt-6">
+					<div className="mb-6">
+						<h2 className="text-xl font-semibold mb-2">Portfolio</h2>
 						<a
 							href={photographer.photographer_profiles.portfolio_url}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-blue-600 hover:underline"
 						>
-							Lihat Portofolio
+							Lihat Portfolio
 						</a>
 					</div>
+					<button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+						Hubungi Fotografer
+					</button>
 				</div>
 			</div>
 		</div>
