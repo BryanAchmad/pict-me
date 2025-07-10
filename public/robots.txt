@@ -1,0 +1,14 @@
+# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+#
+# This file should be placed in the root of your web site.
+#
+# All user agents are not allowed to access the following directories:
+User-agent: *
+Disallow: /api/
+Disallow: /_next/
+
+# Allow all user agents to access all other directories
+Allow: /
+
+# Sitemap
+Sitemap: https://your-domain.com/sitemap.xml
